@@ -1,9 +1,13 @@
+// ml5.js: Pose Estimation with PoseNet
+// The Coding Train / Daniel Shiffman
+// https://thecodingtrain.com/learning/ml5/7.1-posenet.html
+// https://youtu.be/OIo-DIOkNVg
+// https://editor.p5js.org/codingtrain/sketches/ULA97pJXR
+
 let video;
 let poseNet;
 let pose;
 let skeleton;
-let initial_setup = true;
-let initial_distance = 0;
 
 function setup() {
   createCanvas(640, 480);
@@ -14,34 +18,11 @@ function setup() {
 }
 
 function gotPoses(poses) {
-  
+//   console.log(poses);
   if (poses.length > 0) {
     pose = poses[0].pose;
     skeleton = poses[0].skeleton;
   }
-
-  if ( initial_setup === true) {
-    alert(" Set straight for calibrating the shoulder width ")
-    let shoulderl = pose.leftShoulder;
-    let shoulderr = pose.rightShoulder;
-    initial_distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
-    console.log("==============initial distance================");
-    console.log(initial_distance);
-  
-    if ( initial_distance !== undefined){
-      initial_setup = false;
-    }
-  }
-  let shoulderl = pose.leftShoulder;
-  let shoulderr = pose.rightShoulder;
-  var distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
-  var min_dist =  initial_distance - 20
-  var max_dist =  initial_distance + 20
-
-  if ( distance < min_dist || distance > max_dist ){
-    alert( " Sit straight to keep your spine health!! ")
-  }
-
 }
 
 function modelLoaded() {
@@ -52,7 +33,12 @@ function draw() {
   image(video, 0, 0);
 
   if (pose) {
-      for (let i = 0; i < pose.keypoints.length; i++) {
+    let shoulderl = pose.leftShoulder;
+    let shoulderr = pose.rightShoulder;
+    let d = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
+    console.log(d)
+
+    for (let i = 0; i < pose.keypoints.length; i++) {
       let x = pose.keypoints[i].position.x;
       let y = pose.keypoints[i].position.y;
       fill(0, 255, 0);
