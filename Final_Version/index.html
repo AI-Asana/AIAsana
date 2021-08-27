@@ -5,16 +5,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
     <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
     <meta charset="utf-8" />
-    <script type="text/javascript">
-        function openIt() {
-        properties = "width=200,height=500,directories=no,status=no,menubar=no,scrollbars=no,resizable=no";
-        url = "http://www.teenchat.com";
-        window.open(url,"WindowName",properties);
+    <script>
+        console.log(Notification.permission);
+        if (Notification.permission === "granted") {
+           alert("we have permission");
+        } else if (Notification.permission !== "denied") {
+           Notification.requestPermission().then(permission => {
+              console.log(permission);
+           });
         }
-    </script>
 
+        function showNotification(){
+           const notification = new Notification("AI Asana", {
+              body: "Hi there!!"
+           });
+        }
+
+        if ( Notification.permission === "granted"){
+           showNotification();
+        }
+     </script>
 </head>
 
 <body>
     <script src="sketch.js"></script>
+    <h2> Welcome to AI Asana</h2>
+
 </body>
