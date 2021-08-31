@@ -2,6 +2,8 @@ let video;
 let poseNet;
 let pose;
 let skeleton;
+<<<<<<< Updated upstream
+=======
 let initial_setup = true;
 let initial_distance = 0;
 let did_left_desk = false;
@@ -22,6 +24,8 @@ let posture_recognition_interval_time;
 let drink_water_interval_time;
 let break_interval_time;
 
+>>>>>>> Stashed changes
+
 function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO);
@@ -41,6 +45,33 @@ function modelLoaded() {
   console.log('poseNet ready');
 }
 
+<<<<<<< Updated upstream
+function draw() {
+  image(video, 0, 0);
+
+  if (pose) {
+    let shoulderl = pose.leftShoulder;
+    let shoulderr = pose.rightShoulder;
+    let d = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
+    console.log(d)
+
+    for (let i = 0; i < pose.keypoints.length; i++) {
+      let x = pose.keypoints[i].position.x;
+      let y = pose.keypoints[i].position.y;
+      fill(0, 255, 0);
+      ellipse(x, y, 16, 16);
+    }
+
+    for (let i = 0; i < skeleton.length; i++) {
+      let a = skeleton[i][0];
+      let b = skeleton[i][1];
+      strokeWeight(2);
+      stroke(255);
+      line(a.position.x, a.position.y, b.position.x, b.position.y);
+    }
+  }
+}
+=======
 function postureCorrection(){
   if ( initial_setup === true) {
     alert("Calibrating!! Sit straight, capturing the shoulder width")
@@ -281,3 +312,4 @@ setInterval(eyeStrainDetection, 1200000);
 //     }
 //   }
 // }
+>>>>>>> Stashed changes
