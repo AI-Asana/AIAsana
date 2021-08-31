@@ -21,14 +21,11 @@ let min_eye_pos_r_y;
 let posture_recognition_interval_time;
 let drink_water_interval_time;
 let break_interval_time;
-let draw_state = true;
 
 function setup() {
-  var canvas = createCanvas(350, 360);
-  canvas.parent('posture_window');
+  createCanvas(640, 480);
   video = createCapture(VIDEO);
   video.hide();
-  video.size(350, 360)
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotPoses);
 }
@@ -38,14 +35,6 @@ function gotPoses(poses) {
     pose = poses[0].pose;
     skeleton = poses[0].skeleton;
   }
-
-  if ( initial_setup === true) {
-    postureCorrection();
-  }
-  if (poses.length < 0){
-    did_left_desk = true;
-  }
-  updateEyeposition();
 }
 
 function modelLoaded() {
@@ -80,39 +69,7 @@ function postureCorrection(){
       initial_setup = false;
     }
   }
-}
 
-function postureCorrectionNotification() {
-  const notification = new Notification("AI Asana", {body: "Sit straight for keeping your health!"})
-}
-
-function postureCorrection(){
-  if ( initial_setup === true) {
-    alert("Calibrating!! Sit straight, capturing the shoulder width")
-    let shoulderl = pose.leftShoulder;
-    let shoulderr = pose.rightShoulder;
-    initial_distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
-    alert("Calibrating!! stare at the desktop")
-    def_eye_pos_l_x = pose.leftEye.x
-    def_eye_pos_l_y = pose.leftEye.y
-    def_eye_pos_r_x = pose.rightEye.x
-    def_eye_pos_r_y = pose.rightEye.y
-
-    max_eye_pos_l_x = def_eye_pos_l_x + 40
-    max_eye_pos_l_y = def_eye_pos_l_y + 40
-    max_eye_pos_r_x = pose.rightEye.x + 40
-    max_eye_pos_r_y = pose.rightEye.y + 40
-    
-    min_eye_pos_l_x = def_eye_pos_l_x - 40
-    min_eye_pos_l_y = def_eye_pos_l_y - 40
-    min_eye_pos_r_x = pose.rightEye.x - 40
-    min_eye_pos_r_y = pose.rightEye.y - 40
-    
-    if ( initial_distance !== undefined){
-      initial_setup = false;
-    }
-  }
-  
   let shoulderl = pose.leftShoulder;
   let shoulderr = pose.rightShoulder;
   var distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
@@ -121,8 +78,10 @@ function postureCorrection(){
 
   if ( distance < min_dist || distance > max_dist ){
     alert("Sit straight for keeping your health")
+
   } else {
     alert("Posture looks good")
+
   }
 }
 
@@ -167,7 +126,6 @@ const drink_water_reminder = document.getElementById("drink_water_reminder");
 const break_reminder = document.getElementById("break_reminder");
 const reset = document.getElementById("reset")
 const configure = document.getElementById("configure")
-const disable_video = document.getElementById("disable_video")
 
 // onkeyup event
 inputBox.onkeyup  = function(){
@@ -264,18 +222,6 @@ break_reminder.onkeyup  = function(){
   }
 }
 
-// onkeyup event
-disable_video.onkeyup  = function(){
-  let userEnteredValue = disable_video.value; //getting user entered value
-  if(userEnteredValue.trim() != 0){ //if the user value isn't only spaces
-    reset.classList.add("active"); //active the reset button
-    configure.classList.add("active"); //active the configure button
-  }else{
-    reset.classList.remove("active"); //unactive the reset button
-    configure.classList.remove("active"); //unactive the configure button
-  }
-}
-
 configure.onclick = function(){ //when user click on configure icon button
   alert("Configuration saved successfully")
   if ( posture_recognition_freq.value !== "10" ){
@@ -290,9 +236,6 @@ configure.onclick = function(){ //when user click on configure icon button
     break_interval_time = Number(break_reminder.value) * 60000;
     setInterval(remindWalking, break_interval_time);
   }
-  if (disable_video.value !== "false"){
-    disable_video.value = "true"
-  }
   configure.classList.remove("active"); //unactive the configure button once the task added
 }
 
@@ -300,7 +243,6 @@ reset.onclick = function(){ //when user click on reset icon button
   posture_recognition_freq.value = 10;
   drink_water_reminder.value = 60;
   break_reminder.value = 45;
-  disable_video.value = "false";
   reset.classList.remove("active"); //unactive the reset button once the task added
 }
 
@@ -319,33 +261,23 @@ if ( break_interval_time === undefined){
 }
 setInterval(eyeStrainDetection, 1200000);
 
-disable_video.onclick = ()=>{
- draw_state = false
-}
 
-function draw() {
-  if (disable_video.value === "false"){
-    console.log("inside draw if")
-    image(video, 0, 0, 350, 360);
-    if (pose) {
-      for (let i = 0; i < pose.keypoints.length; i++) {
-        let x = pose.keypoints[i].position.x;
-        let y = pose.keypoints[i].position.y;
-        fill(255, 0, 0);
-        ellipse(x, y, 8, 8);
-      }
+// function draw() {
+//   image(video, 0, 0);
+//   if (pose) {
+//     for (let i = 0; i < pose.keypoints.length; i++) {
+//       let x = pose.keypoints[i].position.x;
+//       let y = pose.keypoints[i].position.y;
+//       fill(0, 255, 0);
+//       ellipse(x, y, 8, 8);
+//     }
 
-      for (let i = 0; i < skeleton.length; i++) {
-        let a = skeleton[i][0];
-        let b = skeleton[i][1];
-        strokeWeight(2);
-        stroke(255);
-        line(a.position.x, a.position.y, b.position.x, b.position.y);
-      }
-    }
-  }
-  else{
-    background(55)
-  }
-  
-}
+//     for (let i = 0; i < skeleton.length; i++) {
+//       let a = skeleton[i][0];
+//       let b = skeleton[i][1];
+//       strokeWeight(2);
+//       stroke(255);
+//       line(a.position.x, a.position.y, b.position.x, b.position.y);
+//     }
+//   }
+// }
