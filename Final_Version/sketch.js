@@ -22,6 +22,7 @@ let posture_recognition_interval_time;
 let drink_water_interval_time;
 let break_interval_time;
 
+
 function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO);
@@ -35,6 +36,14 @@ function gotPoses(poses) {
     pose = poses[0].pose;
     skeleton = poses[0].skeleton;
   }
+
+  if ( initial_setup === true) {
+    postureCorrection();
+  }
+  if (poses.length < 0){
+    did_left_desk = true;
+  }
+  updateEyeposition();
 }
 
 function modelLoaded() {
@@ -69,7 +78,39 @@ function postureCorrection(){
       initial_setup = false;
     }
   }
+}
 
+function postureCorrectionNotification() {
+  const notification = new Notification("AI Asana", {body: "Sit straight for keeping your health!"})
+}
+
+function postureCorrection(){
+  if ( initial_setup === true) {
+    alert("Calibrating!! Sit straight, capturing the shoulder width")
+    let shoulderl = pose.leftShoulder;
+    let shoulderr = pose.rightShoulder;
+    initial_distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
+    alert("Calibrating!! stare at the desktop")
+    def_eye_pos_l_x = pose.leftEye.x
+    def_eye_pos_l_y = pose.leftEye.y
+    def_eye_pos_r_x = pose.rightEye.x
+    def_eye_pos_r_y = pose.rightEye.y
+
+    max_eye_pos_l_x = def_eye_pos_l_x + 40
+    max_eye_pos_l_y = def_eye_pos_l_y + 40
+    max_eye_pos_r_x = pose.rightEye.x + 40
+    max_eye_pos_r_y = pose.rightEye.y + 40
+    
+    min_eye_pos_l_x = def_eye_pos_l_x - 40
+    min_eye_pos_l_y = def_eye_pos_l_y - 40
+    min_eye_pos_r_x = pose.rightEye.x - 40
+    min_eye_pos_r_y = pose.rightEye.y - 40
+    
+    if ( initial_distance !== undefined){
+      initial_setup = false;
+    }
+  }
+  
   let shoulderl = pose.leftShoulder;
   let shoulderr = pose.rightShoulder;
   var distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
@@ -78,10 +119,8 @@ function postureCorrection(){
 
   if ( distance < min_dist || distance > max_dist ){
     alert("Sit straight for keeping your health")
-
   } else {
     alert("Posture looks good")
-
   }
 }
 
