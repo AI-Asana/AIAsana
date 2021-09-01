@@ -1,3 +1,10 @@
+/** 
+ * Author: manoj (manojgururaju55@gmail.com)
+ * Credits: https://thecodingtrain.com/learning/ml5/7.1-posenet.html
+ * credits: https://www.codingnepalweb.com/todo-list-app-javascript/
+ */ 
+
+
 let video;
 let poseNet;
 let pose;
@@ -23,17 +30,21 @@ let drink_water_interval_time;
 let break_interval_time;
 let draw_state = true;
 
+
 function setup() {
-  var canvas = createCanvas(350, 360);
-  canvas.parent('posture_window');
-  video = createCapture(VIDEO);
-  video.hide();
-  video.size(350, 360)
-  poseNet = ml5.poseNet(video, modelLoaded);
-  poseNet.on('pose', gotPoses);
+  /** setup function for initializing */
+  var canvas = createCanvas(350, 360);            // creating canvas for displaying
+  canvas.parent('posture_window');                // adding div tag details for displaying inside window
+  video = createCapture(VIDEO);                   // stream webcam
+  video.hide();                                   // hiding video
+  video.size(350, 360)                            // resizing according to div tag
+  poseNet = ml5.poseNet(video, modelLoaded);      // instantiating posenet from ml5.js
+  poseNet.on('pose', gotPoses);                   // applying pre-trained posenet model from tensorflow
 }
 
+
 function gotPoses(poses) {
+  /** function for getting poses and check if user left desk */
   if (poses.length > 0) {
     pose = poses[0].pose;
     skeleton = poses[0].skeleton;
@@ -42,56 +53,28 @@ function gotPoses(poses) {
   if ( initial_setup === true) {
     postureCorrection();
   }
-  if (poses.length < 0){
+  if (poses.length < 0){             // checking if the user has left desk
     did_left_desk = true;
   }
-  updateEyeposition();
+  updateEyeposition();               // calling function to update the eye strain state
 }
 
+
 function modelLoaded() {
+  /** call back function for debugging */
   console.log('poseNet ready');
 }
 
 function postureCorrection(){
+  /** implemented intial callibration for posture recognistion and suggest to change posture when unhealthy posture is been detected*/
+
   if ( initial_setup === true) {
-    alert("Calibrating!! Sit straight, capturing the shoulder width")
-    let shoulderl = pose.leftShoulder;
-    let shoulderr = pose.rightShoulder;
 
-    initial_distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
-    alert("Calibrating!! stare at the desktop")
-
-    def_eye_pos_l_x = pose.leftEye.x
-    def_eye_pos_l_y = pose.leftEye.y
-    def_eye_pos_r_x = pose.rightEye.x
-    def_eye_pos_r_y = pose.rightEye.y 
-
-    max_eye_pos_l_x = def_eye_pos_l_x + 40
-    max_eye_pos_l_y = def_eye_pos_l_y + 40
-    max_eye_pos_r_x = pose.rightEye.x + 40
-    max_eye_pos_r_y = pose.rightEye.y + 40
-    
-    min_eye_pos_l_x = def_eye_pos_l_x - 40
-    min_eye_pos_l_y = def_eye_pos_l_y - 40
-    min_eye_pos_r_x = pose.rightEye.x - 40
-    min_eye_pos_r_y = pose.rightEye.y - 40
-    
-    if ( initial_distance !== undefined){
-      initial_setup = false;
-    }
-  }
-}
-
-function postureCorrectionNotification() {
-  const notification = new Notification("AI Asana", {body: "Sit straight for keeping your health!"})
-}
-
-function postureCorrection(){
-  if ( initial_setup === true) {
     alert("Calibrating!! Sit straight, capturing the shoulder width")
     let shoulderl = pose.leftShoulder;
     let shoulderr = pose.rightShoulder;
     initial_distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
+
     alert("Calibrating!! stare at the desktop")
     def_eye_pos_l_x = pose.leftEye.x
     def_eye_pos_l_y = pose.leftEye.y
@@ -127,17 +110,23 @@ function postureCorrection(){
 }
 
 function remindToDrink() {
+  /** healthy reminder to drink water */
   alert("Stay hydrated!")
 }
 
 function remindWalking() {
+  /** implemented reminder system for motivating user to move arround if they have been sitting for long duration */
   if ( did_left_desk !== true ) {
     alert("You have been sitting for sometime, time to walk arround and remove the body tension")
     did_left_desk = false;
   }
+  else {
+    alert(" 45 mins of work is done! You can take some rest ")
+  }
 }
 
 function updateEyeposition() {
+ /** Updates the state of eye strain */
  var eye_position_l_x = pose.leftEye.x;
  var eye_position_l_y = pose.leftEye.y;
  var eye_position_r_x = pose.rightEye.x;
@@ -152,10 +141,12 @@ function updateEyeposition() {
 }
 
 function eyeStrainDetection() {
+   /** detects eye movement and suggest user to look arround if they are constantly staring more than 20 mins */
   if ( eye_strain_state === false){
     alert(" look away from the desktop!, Stare an object at 20 meter away for 20 secs")
   }
 }
+
 
 // getting all required elements
 const inputBox = document.getElementById("input");
@@ -169,7 +160,8 @@ const reset = document.getElementById("reset")
 const configure = document.getElementById("configure")
 const disable_video = document.getElementById("disable_video")
 
-// onkeyup event
+
+// onkeyup event of input box
 inputBox.onkeyup  = function(){
   let userEnteredValue = inputBox.value; //getting user entered value
   if(userEnteredValue.trim() != 0){ //if the user value isn't only spaces
@@ -178,7 +170,11 @@ inputBox.onkeyup  = function(){
     addBtn.classList.remove("active"); //unactive the add button
   }
 }
+
+
 showTasks(); //calling showTask function
+
+
 addBtn.onclick = function(){ //when user click on plus icon button
   let userEnteredValue = inputBox.value; //getting input field value
   let getLocalStorageData = localStorage.getItem("New Todo"); //getting localstorage
@@ -192,6 +188,8 @@ addBtn.onclick = function(){ //when user click on plus icon button
   showTasks(); //calling showTask function
   addBtn.classList.remove("active"); //unactive the add button once the task added
 }
+
+
 function showTasks(){
   let getLocalStorageData = localStorage.getItem("New Todo");
   if(getLocalStorageData === null){
@@ -213,6 +211,8 @@ function showTasks(){
   todoList.innerHTML = newLiTag; //adding new li tag inside ul tag
   inputBox.value = ""; //once task added leave the input field blank
 }
+
+
 // delete task function
 function deleteTask(index){
   let getLocalStorageData = localStorage.getItem("New Todo");
@@ -221,6 +221,8 @@ function deleteTask(index){
   localStorage.setItem("New Todo", JSON.stringify(listArray));
   showTasks(); //call the showTasks function
 }
+
+
 // delete all tasks function
 deleteAllBtn.onclick = ()=>{
   listArray = []; //empty the array
@@ -228,7 +230,8 @@ deleteAllBtn.onclick = ()=>{
   showTasks(); //call the showTasks function
 }
 
-// onkeyup event
+
+// onkeyup event: posture recognisation setting
 posture_recognition_freq.onkeyup  = function(){
   let userEnteredValue = posture_recognition_freq.value; //getting user entered value
   if(userEnteredValue.trim() != 0){ //if the user value isn't only spaces
@@ -240,7 +243,8 @@ posture_recognition_freq.onkeyup  = function(){
   }
 }
 
-// onkeyup event
+ 
+// onkeyup event: drink water setting
 drink_water_reminder.onkeyup  = function(){
   let userEnteredValue = drink_water_reminder.value; //getting user entered value
   if(userEnteredValue.trim() != 0){ //if the user value isn't only spaces
@@ -252,7 +256,8 @@ drink_water_reminder.onkeyup  = function(){
   }
 }
 
-// onkeyup event
+
+// onkeyup event: break reminder setting
 break_reminder.onkeyup  = function(){
   let userEnteredValue = break_reminder.value; //getting user entered value
   if(userEnteredValue.trim() != 0){ //if the user value isn't only spaces
@@ -264,7 +269,7 @@ break_reminder.onkeyup  = function(){
   }
 }
 
-// onkeyup event
+// onkeyup event: disabling the video setting
 disable_video.onkeyup  = function(){
   let userEnteredValue = disable_video.value; //getting user entered value
   if(userEnteredValue.trim() != 0){ //if the user value isn't only spaces
@@ -276,19 +281,20 @@ disable_video.onkeyup  = function(){
   }
 }
 
+// onclink event: configure button ( updates the app configuration )
 configure.onclick = function(){ //when user click on configure icon button
   alert("Configuration saved successfully")
   if ( posture_recognition_freq.value !== "10" ){
     posture_recognition_interval_time = Number(posture_recognition_freq.value) * 60000;
-    setInterval(postureCorrection, posture_recognition_interval_time);
-  }
+    setInterval(postureCorrection, posture_recognition_interval_time);                // calling posture correction function
+  } 
   if ( drink_water_reminder.value !== "60"){
     drink_water_interval_time = Number(drink_water_reminder.value) * 60000;
-    setInterval(remindToDrink, drink_water_interval_time);
+    setInterval(remindToDrink, drink_water_interval_time);                             // calling reminf to drink function
   }
   if ( break_reminder.value !== "45" ){
     break_interval_time = Number(break_reminder.value) * 60000;
-    setInterval(remindWalking, break_interval_time);
+    setInterval(remindWalking, break_interval_time);                                   // calling remind walking function
   }
   if (disable_video.value !== "false"){
     disable_video.value = "true"
@@ -296,6 +302,7 @@ configure.onclick = function(){ //when user click on configure icon button
   configure.classList.remove("active"); //unactive the configure button once the task added
 }
 
+// onclick event: resets button ( resets the app configuration to default)
 reset.onclick = function(){ //when user click on reset icon button
   posture_recognition_freq.value = 10;
   drink_water_reminder.value = 60;
@@ -304,26 +311,24 @@ reset.onclick = function(){ //when user click on reset icon button
   reset.classList.remove("active"); //unactive the reset button once the task added
 }
 
-if ( posture_recognition_interval_time === undefined){
+
+if ( posture_recognition_interval_time === undefined){                          // Handling undefined value loop
   posture_recognition_interval_time = 600000;
-  setInterval(postureCorrection, posture_recognition_interval_time);
+  setInterval(postureCorrection, posture_recognition_interval_time);           // calling posture correction function at every 10 mins
 }
 
-if ( drink_water_interval_time === undefined){
+if ( drink_water_interval_time === undefined){                                  // Handling undefined value loop
   drink_water_interval_time = 3600000;
-  setInterval(remindToDrink, drink_water_interval_time);
+  setInterval(remindToDrink, drink_water_interval_time);                       // calling reminf to drink function at every 60 mins
 }
-if ( break_interval_time === undefined){
-  break_interval_time = 2700000;
-  setInterval(remindWalking, break_interval_time);
+if ( break_interval_time === undefined){                                        // Handling undefined value loop
+  break_interval_time = 2700000; 
+  setInterval(remindWalking, break_interval_time);                            // calling remind walking function at every 45 mins
 }
-setInterval(eyeStrainDetection, 1200000);
-
-disable_video.onclick = ()=>{
- draw_state = false
-}
+setInterval(eyeStrainDetection, 1200000);                                     // calling reminf to drink function at every 20 mins
 
 function draw() {
+  /** function to display video and pose data based on user options*/
   if (disable_video.value === "false"){
     console.log("inside draw if")
     image(video, 0, 0, 350, 360);
