@@ -346,6 +346,22 @@ function draw() {
   }
   else{
     background(55)
+    if (pose) {
+      for (let i = 0; i < pose.keypoints.length; i++) {
+        let x = pose.keypoints[i].position.x;
+        let y = pose.keypoints[i].position.y;
+        fill(255, 0, 0);
+        ellipse(x, y, 8, 8);
+      }
+
+      for (let i = 0; i < skeleton.length; i++) {
+        let a = skeleton[i][0];
+        let b = skeleton[i][1];
+        strokeWeight(2);
+        stroke(255);
+        line(a.position.x, a.position.y, b.position.x, b.position.y);
+      }
+    }
   }
   
 }
