@@ -29,6 +29,40 @@ let posture_recognition_interval_time;
 let drink_water_interval_time;
 let break_interval_time;
 let draw_state = true;
+let poses;
+let posture_interval;
+let drink_interval;
+let break_interval;
+let posture_interval_conf;
+let drink_interval_conf;
+let break_interval_conf;
+
+// Wrap every letter in a span
+var textWrapper = document.querySelector('.ml1 .letters');
+textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
+
+anime.timeline({loop: true}) 
+  .add({
+     targets: '.ml1 .letter',
+     scale: [0.3,1], opacity: [0,1],
+     translateZ: 0, easing: "easeOutExpo",
+     duration: 600, delay: (el, i) => 70 * (i+1) 
+    })
+  .add({
+    targets: '.ml1 .line',
+    scaleX: [0,1], opacity: [0.5,1], 
+    easing: "easeOutExpo", 
+    duration: 700, 
+    offset: '-=875', 
+    delay: (el, i, l) => 80 * (l - i) 
+  })
+  .add({ 
+    targets: '.ml1',
+    opacity: 0, 
+    duration: 1000, 
+    easing: "easeOutExpo", 
+    delay: 1000 
+  });
 
 
 function setup() {
@@ -42,21 +76,23 @@ function setup() {
   poseNet.on('pose', gotPoses);                   // applying pre-trained posenet model from tensorflow
 }
 
-
 function gotPoses(poses) {
   /** function for getting poses and check if user left desk */
   if (poses.length > 0) {
     pose = poses[0].pose;
     skeleton = poses[0].skeleton;
+    if ( initial_setup === true) {
+      postureCorrection();
+    }
+    updateEyeposition();               // calling function to update the eye strain state
+  }
+  else{
+    pose = null;
   }
 
-  if ( initial_setup === true) {
-    postureCorrection();
-  }
   if (poses.length < 0){             // checking if the user has left desk
     did_left_desk = true;
   }
-  updateEyeposition();               // calling function to update the eye strain state
 }
 
 
@@ -65,10 +101,18 @@ function modelLoaded() {
   console.log('poseNet ready');
 }
 
+function notification_message(text){
+  let notification = new Notification('AI Asana', {
+    body: text,
+    icon: "assets/LOGO.PNG"
+  });
+  setTimeout(() => { notification.close();}, 2 * 1000);
+}
+
 function postureCorrection(){
   /** implemented intial callibration for posture recognistion and suggest to change posture when unhealthy posture is been detected*/
 
-  if ( initial_setup === true) {
+  if ( initial_setup === true ) {
 
     alert("Calibrating!! Sit straight, capturing the shoulder width")
     let shoulderl = pose.leftShoulder;
@@ -95,33 +139,34 @@ function postureCorrection(){
       initial_setup = false;
     }
   }
+  if (pose){
+    let shoulderl = pose.leftShoulder;
+    let shoulderr = pose.rightShoulder;
+    var distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
+    var min_dist =  initial_distance - 20
+    var max_dist =  initial_distance + 20
   
-  let shoulderl = pose.leftShoulder;
-  let shoulderr = pose.rightShoulder;
-  var distance = dist(shoulderl.x, shoulderl.y, shoulderr.x, shoulderr.y);
-  var min_dist =  initial_distance - 20
-  var max_dist =  initial_distance + 20
-
-  if ( distance < min_dist || distance > max_dist ){
-    alert("Sit straight for keeping your health")
-  } else {
-    alert("Posture looks good")
+    if ( distance < min_dist || distance > max_dist ){
+      notification_message("Sit straight for keeping your health")
+    } else {
+      notification_message("Posture looks good")
+    }
   }
 }
 
 function remindToDrink() {
   /** healthy reminder to drink water */
-  alert("Stay hydrated!")
+  notification_message("Stay hydrated!")
 }
 
 function remindWalking() {
   /** implemented reminder system for motivating user to move arround if they have been sitting for long duration */
   if ( did_left_desk !== true ) {
-    alert("You have been sitting for sometime, time to walk arround and remove the body tension")
+    notification_message("You have been sitting for sometime, time to walk arround and remove the body tension")
     did_left_desk = false;
   }
   else {
-    alert(" 45 mins of work is done! You can take some rest ")
+    notification_message(" 45 mins of work is done! You can take some rest ")
   }
 }
 
@@ -143,7 +188,7 @@ function updateEyeposition() {
 function eyeStrainDetection() {
    /** detects eye movement and suggest user to look arround if they are constantly staring more than 20 mins */
   if ( eye_strain_state === false){
-    alert(" look away from the desktop!, Stare an object at 20 meter away for 20 secs")
+    notification_message(" look away from the desktop!, Stare an object at 20 meter away for 20 secs")
   }
 }
 
@@ -283,49 +328,59 @@ disable_video.onkeyup  = function(){
 
 // onclink event: configure button ( updates the app configuration )
 configure.onclick = function(){ //when user click on configure icon button
-  alert("Configuration saved successfully")
-  if ( posture_recognition_freq.value !== "10" ){
-    posture_recognition_interval_time = Number(posture_recognition_freq.value) * 60000;
-    setInterval(postureCorrection, posture_recognition_interval_time);                // calling posture correction function
-  } 
-  if ( drink_water_reminder.value !== "60"){
-    drink_water_interval_time = Number(drink_water_reminder.value) * 60000;
-    setInterval(remindToDrink, drink_water_interval_time);                             // calling reminf to drink function
-  }
-  if ( break_reminder.value !== "45" ){
-    break_interval_time = Number(break_reminder.value) * 60000;
-    setInterval(remindWalking, break_interval_time);                                   // calling remind walking function
-  }
-  if (disable_video.value !== "false"){
-    disable_video.value = "true"
+  configure_text.innerHTML = "<br><span style='color: green;'>Configuration saves sucessfully</span>"
+  clearInterval(posture_interval);
+  clearInterval(drink_interval);
+  clearInterval(break_interval);
+  clearInterval(posture_interval_conf);
+  clearInterval(drink_interval_conf);
+  clearInterval(break_interval_conf);
+  console.log("cleared all intervals successfully inside configure")  
+  posture_recognition_interval_time = Number(posture_recognition_freq.value) * 60000;
+  posture_interval_conf = setInterval(postureCorrection, posture_recognition_interval_time);                // calling posture correction function
+  drink_water_interval_time = Number(drink_water_reminder.value) * 60000;
+  drink_interval_conf = setInterval(remindToDrink, drink_water_interval_time);                             // calling reminf to drink function
+  break_interval_time = Number(break_reminder.value) * 60000;
+  break_interval_conf = setInterval(remindWalking, break_interval_time);                                   // calling remind walking function
+  if (disable_video.value !== 'false'){
+    disable_video.value = "true" 
   }
   configure.classList.remove("active"); //unactive the configure button once the task added
 }
 
 // onclick event: resets button ( resets the app configuration to default)
 reset.onclick = function(){ //when user click on reset icon button
+  clearInterval(posture_interval);
+  clearInterval(drink_interval);
+  clearInterval(break_interval);
+  clearInterval(posture_interval_conf);
+  clearInterval(drink_interval_conf);
+  clearInterval(break_interval_conf);
+  console.log("cleared all intervals successfully and set to default")
   posture_recognition_freq.value = 10;
   drink_water_reminder.value = 60;
   break_reminder.value = 45;
   disable_video.value = "false";
+  configure.click()
   reset.classList.remove("active"); //unactive the reset button once the task added
+  configure_text.innerHTML = "<br><span style='color: red;'>Default configuration loaded</span>"
 }
 
 
-if ( posture_recognition_interval_time === undefined){                          // Handling undefined value loop
-  posture_recognition_interval_time = 600000;
-  setInterval(postureCorrection, posture_recognition_interval_time);           // calling posture correction function at every 10 mins
+if ( posture_recognition_interval_time === undefined){                                                // Handling undefined value loop
+  posture_recognition_interval_time = 600000; 
+  posture_interval = setInterval(postureCorrection, posture_recognition_interval_time);           // calling posture correction function at every 10 mins
 }
 
-if ( drink_water_interval_time === undefined){                                  // Handling undefined value loop
+if ( drink_water_interval_time === undefined){                                                       // Handling undefined value loop
   drink_water_interval_time = 3600000;
-  setInterval(remindToDrink, drink_water_interval_time);                       // calling reminf to drink function at every 60 mins
+  drink_interval = setInterval(remindToDrink, drink_water_interval_time);                       // calling reminf to drink function at every 60 mins
 }
-if ( break_interval_time === undefined){                                        // Handling undefined value loop
+if ( break_interval_time === undefined){                                                           // Handling undefined value loop
   break_interval_time = 2700000; 
-  setInterval(remindWalking, break_interval_time);                            // calling remind walking function at every 45 mins
+  break_interval = setInterval(remindWalking, break_interval_time);                            // calling remind walking function at every 45 mins
 }
-setInterval(eyeStrainDetection, 1200000);                                     // calling reminf to drink function at every 20 mins
+setInterval(eyeStrainDetection, 1200000);                                                         // calling reminf to drink function at every 20 mins
 
 function draw() {
   /** function to display video and pose data based on user options*/

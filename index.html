@@ -9,13 +9,14 @@
    <link rel = "icon" href = "assets/LOGO.PNG" type = "image/x-icon">
    <link rel="stylesheet" href="style.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" ></script>
 </head>
 
 <body>
-    <h2 style="color:#FFFFFF;text-align:center;font-weight:bold;font-size:50px;font-family:'Courier New', Courier, monospace;"> Welcome to AI Asana</h2>
+
     <div class="grid-container"> <!-- grid to display tiles parallely-->
       <div class="wrapper">      <!-- To Do App block-->
-         <header>Todo</header>
+         <header style="color: #f63366;">Todo <img src="assets/min1.jpeg" height="15%" width="20%"></header>
          <div class="inputField">
            <input id="input" type="text" placeholder="Add your new todo">
            <button id="add_button"><i class="fas fa-plus"></i></button>
@@ -30,7 +31,7 @@
        </div>
        
        <div class="wrapper_controls"> <!-- App configuration block-->
-         <header>App Controls</header>
+        <header style="color: #f63366;">App Controls <img src="assets/settings.gif" height="15%" width="25%"></header></header>
          <summary style="font-weight: lighter;"> Enter time frequency in mins</summary>
          <div class="inputField_controls">
            <label> Posture Recognition: </label>
@@ -51,13 +52,28 @@
          <div class="footer_controls">
            <button id="reset">Reset</button>
            <button id="configure">Configure</button>
+           <p id="configure_text"></p>
          </div>
        </div>
 
        <div class="wrapper_controls", id="posture_window"> <!-- Posture recognisation block-->
-        <header>Posture window</header>
+        <header style="color: #f63366;">Posture Window <img src="assets/posture.gif" height="10%" width="13%"></header></header>
       </div>
     </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <h2 style="color:#FFFFFF;text-align:center;font-weight:bold;font-size:50px;font-family:'Courier New', Courier, monospace;" class="ml1">
+      <!-- <header></header> -->
+      <span class="text-wrapper">
+        <span class="line line1"></span>
+        <header class="letters">    Welcome To AI Asana</header>
+        <span class="line line2"></span>
+      </span>
+    </h2>
     <script src="sketch.js"></script>
 </body>
 </html>
